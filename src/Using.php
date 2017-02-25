@@ -18,5 +18,5 @@ if (function_exists('using')) {
  */
 function using(IDisposable $obj, callable $worker)
 {
-    return Usable::using($obj, $worker);
+    return Usable::getInstance()->using($obj, $worker);
 }
