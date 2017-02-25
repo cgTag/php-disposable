@@ -1,25 +1,27 @@
 <?php
-namespace cgTag\Disposable;
+namespace cgTag\Disposable\Handlers;
+
+use cgTag\Disposable\IDisposable;
 
 /**
  * Default implication of the using() function.
  */
-final class Usable implements IUsable
+final class UsingHandler implements IUsingHandler
 {
     /**
-     * @var IUsable
+     * @var IUsingHandler
      */
     public static $_instance = null;
 
     /**
      * Gets the global instance.
      *
-     * @return IUsable
+     * @return IUsingHandler
      */
-    public static function getInstance(): IUsable
+    public static function getInstance(): IUsingHandler
     {
         if (static::$_instance === null) {
-            static::setInstance(new Usable());
+            static::setInstance(new UsingHandler());
         }
         return static::$_instance;
     }
@@ -27,9 +29,9 @@ final class Usable implements IUsable
     /**
      * Sets the global instance (used for testing).
      *
-     * @param IUsable $instance
+     * @param IUsingHandler $instance
      */
-    public static function setInstance(IUsable $instance = null)
+    public static function setInstance(IUsingHandler $instance = null)
     {
         static::$_instance = $instance;
     }

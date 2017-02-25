@@ -1,9 +1,9 @@
 <?php
 namespace cgTag\Disposable\Test\TestCase;
 
-use cgTag\Disposable\IUsable;
+use cgTag\Disposable\Handlers\IUsingHandler;
+use cgTag\Disposable\Handlers\UsingHandler;
 use cgTag\Disposable\Test\Mocks\MockDisposable;
-use cgTag\Disposable\Usable;
 use PHPUnit_Framework_MockObject_MockObject;
 
 class UsingTest extends BaseTestCase
@@ -16,8 +16,8 @@ class UsingTest extends BaseTestCase
         $dispose = new MockDisposable();
         $this->assertSame(0, $dispose->count);
 
-        /** @var PHPUnit_Framework_MockObject_MockObject|IUsable $mock */
-        $mock = $this->getMockBuilder(IUsable::class)
+        /** @var PHPUnit_Framework_MockObject_MockObject|IUsingHandler $mock */
+        $mock = $this->getMockBuilder(IUsingHandler::class)
             ->setMethods(['using'])
             ->getMock();
 
@@ -26,7 +26,7 @@ class UsingTest extends BaseTestCase
             ->with($dispose, $this->noop)
             ->willReturn('hello world');
 
-        Usable::setInstance($mock);
+        UsingHandler::setInstance($mock);
         $result = using($dispose, $this->noop);
 
         $this->assertSame('hello world', $result);

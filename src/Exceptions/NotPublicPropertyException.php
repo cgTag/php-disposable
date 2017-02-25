@@ -1,8 +1,6 @@
 <?php
 namespace cgTag\Disposable\Exceptions;
 
-use Exception;
-
 class NotPublicPropertyException extends DisposableException
 {
     public function __construct(string $className, string $propertyName)

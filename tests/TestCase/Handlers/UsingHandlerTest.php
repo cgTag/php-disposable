@@ -1,11 +1,12 @@
 <?php
-namespace cgTag\Disposable\Test\TestCase;
+namespace cgTag\Disposable\Test\TestCase\Handlers;
 
-use cgTag\Disposable\IUsable;
-use cgTag\Disposable\Usable;
+use cgTag\Disposable\Handlers\IUsingHandler;
+use cgTag\Disposable\Handlers\UsingHandler;
+use cgTag\Disposable\Test\TestCase\BaseTestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 
-class UsableTest extends BaseTestCase
+class UsingHandlerTest extends BaseTestCase
 {
     /**
      * @test
@@ -13,7 +14,7 @@ class UsableTest extends BaseTestCase
     public function shouldBeSameInstance()
     {
         $mock = $this->mustDisposeOnce();
-        $usable = new Usable();
+        $usable = new UsingHandler();
         $usable->using($mock, function ($value) use ($mock) {
             $this->assertSame($value, $mock);
         });
@@ -25,7 +26,7 @@ class UsableTest extends BaseTestCase
     public function shouldCallClosure()
     {
         $count = 0;
-        $usable = new Usable();
+        $usable = new UsingHandler();
         $usable->using($this->mustDisposeOnce(), function () use (&$count) {
             $count++;
         });
@@ -37,7 +38,7 @@ class UsableTest extends BaseTestCase
      */
     public function shouldCallDispose()
     {
-        $usable = new Usable();
+        $usable = new UsingHandler();
         $usable->using($this->mustDisposeOnce(), $this->noop);
     }
 
@@ -48,7 +49,7 @@ class UsableTest extends BaseTestCase
      */
     public function shouldCallDisposeOnException()
     {
-        $usable = new Usable();
+        $usable = new UsingHandler();
         $usable->using($this->mustDisposeOnce(), function () {
             throw new \Exception('foobar');
         });
@@ -59,10 +60,10 @@ class UsableTest extends BaseTestCase
      */
     public function shouldClearGlobal()
     {
-        $this->assertInstanceOf(Usable::class, Usable::getInstance());
+        $this->assertInstanceOf(UsingHandler::class, UsingHandler::getInstance());
 
-        Usable::setInstance(null);
-        $this->assertNull(Usable::$_instance);
+        UsingHandler::setInstance(null);
+        $this->assertNull(UsingHandler::$_instance);
     }
 
     /**
@@ -70,7 +71,7 @@ class UsableTest extends BaseTestCase
      */
     public function shouldHaveClosureReturnValue()
     {
-        $usable = new Usable();
+        $usable = new UsingHandler();
         $result = $usable->using($this->mustDisposeOnce(), function () {
             return "hello world!";
         });
@@ -82,10 +83,10 @@ class UsableTest extends BaseTestCase
      */
     public function shouldReplaceGlobalWithMockObject()
     {
-        /** @var PHPUnit_Framework_MockObject_MockObject|IUsable $mock */
-        $mock = $this->getMockBuilder(IUsable::class)->getMock();
-        Usable::setInstance($mock);
+        /** @var PHPUnit_Framework_MockObject_MockObject|IUsingHandler $mock */
+        $mock = $this->getMockBuilder(IUsingHandler::class)->getMock();
+        UsingHandler::setInstance($mock);
 
-        $this->assertSame($mock, Usable::getInstance());
+        $this->assertSame($mock, UsingHandler::getInstance());
     }
 }

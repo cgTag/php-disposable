@@ -1,7 +1,7 @@
 <?php
 namespace cgTag\Disposable\Traits;
 
-use cgTag\Disposable\Dispose;
+use cgTag\Disposable\Handlers\DisposeHandler;
 use cgTag\Disposable\IDisposable;
 
 /**
@@ -14,6 +14,6 @@ trait DisposeTrait
      */
     public function dispose()
     {
-        Dispose::properties($this);
+        DisposeHandler::getInstance()->properties($this);
     }
 }

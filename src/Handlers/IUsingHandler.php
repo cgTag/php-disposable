@@ -1,7 +1,9 @@
 <?php
-namespace cgTag\Disposable;
+namespace cgTag\Disposable\Handlers;
 
-interface IUsable
+use cgTag\Disposable\IDisposable;
+
+interface IUsingHandler
 {
     /**
      * Wraps the callable in a try/finally before calling dispose()

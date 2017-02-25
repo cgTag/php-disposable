@@ -1,6 +1,6 @@
 <?php
 use cgTag\Disposable\IDisposable;
-use cgTag\Disposable\Usable;
+use cgTag\Disposable\Handlers\UsingHandler;
 
 /**
  * Prevents collision with other global functions.
@@ -18,5 +18,5 @@ if (function_exists('using')) {
  */
 function using(IDisposable $obj, callable $worker)
 {
-    return Usable::getInstance()->using($obj, $worker);
+    return UsingHandler::getInstance()->using($obj, $worker);
 }

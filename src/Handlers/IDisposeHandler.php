@@ -1,27 +1,19 @@
 <?php
-namespace cgTag\Disposable;
-
+namespace cgTag\Disposable\Handlers;
 
 use cgTag\Disposable\Exceptions\MissingPropertyException;
 use cgTag\Disposable\Exceptions\NotAnObjectException;
 use cgTag\Disposable\Exceptions\NotPublicPropertyException;
 use cgTag\Disposable\Exceptions\StaticPropertyException;
-use cgTag\Disposable\Handlers\DisposeHandler;
 
-/**
- * A convenience static implementation of IDispose
- */
-final class Dispose
+interface IDisposeHandler
 {
     /**
      * Simply calls dispose() of the passed value implements IDisposable.
      *
      * @param mixed $_obj
      */
-    public static function object($_obj)
-    {
-        DisposeHandler::getInstance()->object($_obj);
-    }
+    public function object($_obj);
 
     /**
      * Disposes the properties of an object, but not the object itself.
@@ -32,10 +24,7 @@ final class Dispose
      * @throws StaticPropertyException
      * @return int Number of properties disposed.
      */
-    public static function properties($_this, bool $disposeArrays = true): int
-    {
-        return DisposeHandler::getInstance()->properties($_this, $disposeArrays);
-    }
+    public function properties($_this, bool $disposeArrays = true): int;
 
     /**
      * This function is a convenience method for disposing of properties. It's intended to be used inside the dispose()
@@ -70,8 +59,5 @@ final class Dispose
      * @throws MissingPropertyException
      * @throws NotAnObjectException
      */
-    public static function property($_this, string $property)
-    {
-        DisposeHandler::getInstance()->property($_this, $property);
-    }
+    public function property($_this, string $property);
 }
