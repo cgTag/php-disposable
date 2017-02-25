@@ -27,10 +27,7 @@ function using(IDisposable $obj, callable $worker)
     try {
         return $worker($obj);
     } finally {
-        if ($obj !== null) {
-            $obj->dispose();
-            unset($obj);
-        }
+        $obj->dispose();
     }
 }
 
