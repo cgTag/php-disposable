@@ -1,8 +1,6 @@
 <?php
 namespace cgTag\Disposable\Test\TestCase;
 
-use function cgTag\Disposable\using;
-
 class DisposableTest extends DisposeTestCase
 {
     /**

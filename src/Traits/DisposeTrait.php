@@ -1,8 +1,9 @@
 <?php
 namespace cgTag\Disposable\Traits;
 
-use function cgTag\Disposable\dispose;
+//use function cgTag\Disposable\dispose;
 use cgTag\Disposable\Exceptions\DisposableException;
+use cgTag\Disposable\Garbage;
 use cgTag\Disposable\IDisposable;
 
 /**
@@ -35,11 +36,11 @@ trait DisposeTrait
             }
             if (is_array($value) && $this->dispose_arrays === true) {
                 array_walk_recursive($value, function ($item) {
-                    dispose($item);
+                    Garbage::dispose($item);
                 });
             }
             if (is_object($value) && $property->isPublic()) {
-                dispose($this, $name);
+                Garbage::dispose($this, $name);
             }
         }
 

@@ -1,7 +1,11 @@
 {
     "name": "cgtag/php-disposable",
     "description": "A tiny library that adds the disposable pattern to PHP",
-    "keywords": ["disposable","php","library"],
+    "keywords": [
+        "disposable",
+        "php",
+        "library"
+    ],
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -23,7 +27,10 @@
     "autoload": {
         "psr-4": {
             "cgTag\\Disposable\\": "src"
-        }
+        },
+        "files": [
+            "src/Using.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
