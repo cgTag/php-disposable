@@ -19,11 +19,13 @@ class DisposeTestCase extends TestCase
      *
      * @return PHPUnit_Framework_MockObject_MockObject|IDisposable
      */
-    public function getMockDisposable()
+    public function mustDisposeOnce()
     {
-        return $this->getMockBuilder(IDisposable::class)
+        $mock = $this->getMockBuilder(IDisposable::class)
             ->setMethods(['dispose'])
             ->getMock();
+        $mock->expects($this->once())->method('dispose');
+        return $mock;
     }
 
     /**
