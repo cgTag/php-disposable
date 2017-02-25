@@ -1,11 +1,20 @@
 <?php
 namespace cgTag\Disposable\Exceptions;
 
-class NotPublicPropertyException extends DisposableException
+class NotPublicPropertyException extends PropertyException
 {
-    public function __construct(string $className, string $propertyName)
+    /**
+     * @param string $className
+     * @param string $propertyName
+     * @param \Exception $previous
+     */
+    public function __construct(string $className, string $propertyName, \Exception $previous = null)
     {
-        parent::__construct("Can not auto-dispose of non-public GemsDisposable property: {$className}::{$propertyName}");
+        parent::__construct(
+            $className,
+            $propertyName,
+            "Can not dispose of non-public property",
+            $previous
+        );
     }
-
 }

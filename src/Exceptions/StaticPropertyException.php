@@ -1,16 +1,22 @@
 <?php
 namespace cgTag\Disposable\Exceptions;
 
-class StaticPropertyException extends DisposableException
+use cgTag\Disposable\IDisposable;
+
+class StaticPropertyException extends PropertyException
 {
     /**
-     * @param string $message
-     * @param int $code
+     * @param string $className
+     * @param string $property
      * @param \Exception|null $previous
      */
-    public function __construct($message = "Found a static property that implements IDisposable. This usage is not supported.", $code = 0, \Exception $previous = null)
+    public function __construct(string $className, string $property, \Exception $previous = null)
     {
-        parent::__construct($message, $code, $previous);
+        parent::__construct(
+            $className,
+            $property,
+            sprintf("Static property implements %s", IDisposable::class),
+            $previous
+        );
     }
-
 }

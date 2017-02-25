@@ -7,7 +7,7 @@ use cgTag\Disposable\Exceptions\NotPublicPropertyException;
 use cgTag\Disposable\Exceptions\StaticPropertyException;
 use cgTag\Disposable\IDisposable;
 
-final class DisposeHandler implements IDisposeHandler
+class DisposeHandler implements IDisposeHandler
 {
     /**
      * @var DisposeHandler|null
@@ -64,12 +64,12 @@ final class DisposeHandler implements IDisposeHandler
             $propertyValue = $property->getValue($_this);
             if ($propertyValue instanceof IDisposable) {
                 if ($property->isStatic()) {
-                    throw new StaticPropertyException();
+                    throw new StaticPropertyException(get_class($_this), $propertyName);
                 }
                 if (!$property->isPublic()) {
-                    throw new NotPublicPropertyException($reflector->name, $propertyName);
+                    throw new NotPublicPropertyException(get_class($_this), $propertyName);
                 }
-                DisposeHandler::property($_this, $propertyName);
+                $this->property($_this, $propertyName);
                 $count++;
             }
             if (is_array($propertyValue) && $disposeArrays) {
@@ -78,7 +78,7 @@ final class DisposeHandler implements IDisposeHandler
                         // prevents endless loop
                         return;
                     }
-                    DisposeHandler::object($item);
+                    $this->object($item);
                 });
             }
         }
@@ -118,8 +118,9 @@ final class DisposeHandler implements IDisposeHandler
      *
      * @param mixed $_this
      * @param string $property
-     * @throws MissingPropertyException
      * @throws NotAnObjectException
+     * @throws NotPublicPropertyException
+     * @throws StaticPropertyException
      */
     public function property($_this, string $property)
     {
@@ -127,14 +128,34 @@ final class DisposeHandler implements IDisposeHandler
             throw new NotAnObjectException();
         }
 
-        try {
-            $reflectProp = new \ReflectionProperty(get_class($_this), $property);
-        } catch (\ReflectionException $ex) {
-            throw new MissingPropertyException($_this, $property, $ex);
+        $className = get_class($_this);
+        $reflectProp = $this->getReflectionProperty($className, $property);
+
+        if ($reflectProp->isStatic()) {
+            throw new StaticPropertyException($className, $property);
         }
 
-        DisposeHandler::object($reflectProp->getValue($_this));
+        if (!$reflectProp->isPublic()) {
+            throw new NotPublicPropertyException($className, $property);
+        }
+
+        $this->object($reflectProp->getValue($_this));
 
         $reflectProp->setValue($_this, null);
+    }
+
+    /**
+     * @param string $className
+     * @param string $property
+     * @return \ReflectionProperty
+     * @throws MissingPropertyException
+     */
+    private function getReflectionProperty(string $className, string $property): \ReflectionProperty
+    {
+        try {
+            return new \ReflectionProperty($className, $property);
+        } catch (\ReflectionException $ex) {
+            throw new MissingPropertyException($className, $property, $ex);
+        }
     }
 }

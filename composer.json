@@ -38,6 +38,7 @@
         }
     },
     "scripts": {
-        "test": "phpunit --no-coverage"
+        "test": "phpunit --no-coverage",
+        "coverage": "phpunit"
     }
 }

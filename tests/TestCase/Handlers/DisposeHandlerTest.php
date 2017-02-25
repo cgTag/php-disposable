@@ -5,7 +5,11 @@ use cgTag\Disposable\Handlers\DisposeHandler;
 use cgTag\Disposable\Handlers\IDisposeHandler;
 use cgTag\Disposable\Test\Mocks\MockDisposable;
 use cgTag\Disposable\Test\Mocks\MockObjectWithProperty;
+use cgTag\Disposable\Test\Mocks\MockProperties;
+use cgTag\Disposable\Test\Mocks\MockWithPrivate;
+use cgTag\Disposable\Test\Mocks\MockWithStatic;
 use cgTag\Disposable\Test\TestCase\BaseTestCase;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class DisposeHandlerTest extends BaseTestCase
 {
@@ -25,22 +29,40 @@ class DisposeHandlerTest extends BaseTestCase
     /**
      * @test
      */
-    public function shouldCallPropertyForEachProperty()
-    {
-        $handler = new DisposeHandler();
-
-        $this->markTestSkipped();
-    }
-
-    /**
-     * @test
-     */
     public function shouldCreateNewInstance()
     {
         DisposeHandler::setInstance(null);
         $this->assertNull(DisposeHandler::$_instance);
 
         $this->assertInstanceOf(DisposeHandler::class, DisposeHandler::getInstance());
+    }
+
+    /**
+     * @test
+     */
+    public function shouldDisposeEachProperty()
+    {
+        $mock = new MockProperties();
+        $mock->prop1 = new MockDisposable();
+        $mock->prop2 = new MockDisposable();
+        $mock->prop3 = new MockDisposable();
+        $mock->prop4 = new MockDisposable();
+
+        /** @var DisposeHandler|PHPUnit_Framework_MockObject_MockObject $handler */
+        $handler = $this->getMockBuilder(DisposeHandler::class)
+            ->setMethodsExcept(['properties'])
+            ->getMock();
+
+        $handler->method('property')
+            ->withConsecutive(
+                [$this->identicalTo($mock), $this->equalTo('prop1')],
+                [$this->identicalTo($mock), $this->equalTo('prop2')],
+                [$this->identicalTo($mock), $this->equalTo('prop3')],
+                [$this->identicalTo($mock), $this->equalTo('prop4')]
+            );
+
+        $result = $handler->properties($mock);
+        $this->assertSame(4, $result);
     }
 
     /**
@@ -94,7 +116,7 @@ class DisposeHandlerTest extends BaseTestCase
     /**
      * @test
      * @expectedException \cgTag\Disposable\Exceptions\MissingPropertyException
-     * @expectedExceptionMessage Property "title" does not exist on stdClass
+     * @expectedExceptionMessage Missing property on stdClass::$title
      */
     public function shouldThrowMissingProperty()
     {
@@ -131,12 +153,14 @@ class DisposeHandlerTest extends BaseTestCase
 
     /**
      * @test
+     * @expectedException \cgTag\Disposable\Exceptions\NotPublicPropertyException
+     * @expectedExceptionMessage
      */
     public function shouldThrowNotPublic()
     {
         $handler = new DisposeHandler();
-
-        $this->markTestSkipped();
+        $mock = new MockWithPrivate();
+        $handler->property($mock, 'value');
     }
 
     /**
@@ -152,12 +176,15 @@ class DisposeHandlerTest extends BaseTestCase
 
     /**
      * @test
+     * @expectedException \cgTag\Disposable\Exceptions\StaticPropertyException
+     * @expectedExceptionMessage
      */
     public function shouldThrowStaticProperty()
     {
         $handler = new DisposeHandler();
-
-        $this->markTestSkipped();
+        $mock = new MockWithStatic();
+        MockWithStatic::$value = new MockDisposable();
+        $handler->property($mock, 'value');
     }
 
     /**

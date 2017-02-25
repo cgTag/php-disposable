@@ -1,16 +1,20 @@
 <?php
 namespace cgTag\Disposable\Exceptions;
 
-class MissingPropertyException extends DisposableException
+class MissingPropertyException extends PropertyException
 {
     /**
-     * @param mixed $refObject
+     * @param string $className
      * @param string $property
      * @param \Exception $previous
      */
-    public function __construct($refObject, string $property, \Exception $previous = null)
+    public function __construct(string $className, string $property, \Exception $previous = null)
     {
-        parent::__construct(sprintf("Property \"%s\" does not exist on %s", $property, get_class($refObject)), 0, $previous);
+        parent::__construct(
+            $className,
+            $property,
+            'Missing property',
+            $previous
+        );
     }
-
 }
