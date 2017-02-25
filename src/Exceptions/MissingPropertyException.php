@@ -6,10 +6,11 @@ class MissingPropertyException extends DisposableException
     /**
      * @param mixed $refObject
      * @param string $property
+     * @param \Exception $previous
      */
-    public function __construct($refObject, string $property)
+    public function __construct($refObject, string $property, \Exception $previous = null)
     {
-        parent::__construct(sprintf("Garbage::dispose(%s,'%s') called, but property does not exist on target object.", get_class($refObject), $property));
+        parent::__construct(sprintf("Property \"%s\" does not exist on %s", $property, get_class($refObject)), 0, $previous);
     }
 
 }

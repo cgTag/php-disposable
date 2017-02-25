@@ -13,7 +13,7 @@ class DisposeTest extends BaseTestCase
      */
     public function shouldForwardObjectCall()
     {
-        $value = new \StdClass();
+        $value = new \stdClass();
 
         $mock = $this->getMockBuilder(IDisposeHandler::class)->setMethods(['object', 'property', 'properties'])->getMock();
         $mock->expects($this->once())->method('object')->with($value);
@@ -31,7 +31,7 @@ class DisposeTest extends BaseTestCase
      */
     public function shouldForwardPropertiesCall(bool $allowArrays)
     {
-        $value = new \StdClass();
+        $value = new \stdClass();
 
         $mock = $this->getMockBuilder(IDisposeHandler::class)->setMethods(['object', 'property', 'properties'])->getMock();
         $mock->expects($this->never())->method('object');
@@ -59,7 +59,7 @@ class DisposeTest extends BaseTestCase
      */
     public function shouldForwardPropertyCall()
     {
-        $value = new \StdClass();
+        $value = new \stdClass();
 
         $mock = $this->getMockBuilder(IDisposeHandler::class)->setMethods(['object', 'property', 'properties'])->getMock();
         $mock->expects($this->never())->method('object');

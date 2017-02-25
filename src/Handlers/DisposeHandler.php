@@ -127,11 +127,11 @@ final class DisposeHandler implements IDisposeHandler
             throw new NotAnObjectException();
         }
 
-        $reflectProp = new \ReflectionProperty(get_class($_this), $property);
-
-//        if (!isset($_this->$property)) {
-//            throw new MissingPropertyException($_this, $property);
-//        }
+        try {
+            $reflectProp = new \ReflectionProperty(get_class($_this), $property);
+        } catch (\ReflectionException $ex) {
+            throw new MissingPropertyException($_this, $property, $ex);
+        }
 
         DisposeHandler::object($reflectProp->getValue($_this));
 
