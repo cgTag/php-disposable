@@ -1,6 +1,7 @@
 <?php
 namespace cgTag\Disposable\Traits;
 
+use function cgTag\Disposable\dispose;
 use cgTag\Disposable\Exceptions\DisposableException;
 use cgTag\Disposable\IDisposable;
 
