@@ -1,8 +1,8 @@
 <?php
 namespace cgTag\Disposable\Traits;
 
-//use function cgTag\Disposable\dispose;
-use cgTag\Disposable\Exceptions\DisposableException;
+use cgTag\Disposable\Exceptions\NotPublicPropertyException;
+use cgTag\Disposable\Exceptions\StaticPropertyException;
 use cgTag\Disposable\Garbage;
 use cgTag\Disposable\IDisposable;
 
@@ -12,43 +12,45 @@ use cgTag\Disposable\IDisposable;
 trait DisposeTrait
 {
     /**
-     * @var bool Set to false to disable disposing of array properties.
-     */
-    private $dispose_arrays = true;
-
-    /**
      * Disposes of all public, protected and private properties.
      */
     public function dispose()
     {
+        if ($this instanceof IDisposeTraitListener && $this->beforeDispose() === false) {
+            return;
+        }
+
+        $disposeArrays = ($this instanceof IDisposeTraitListener)
+            ? $this->disposeArrays()
+            : true;
+
         $reflector = new \ReflectionClass($this);
         foreach ($reflector->getProperties() as $property) {
-            $name = $property->getName();
+            $propertyName = $property->getName();
             $property->setAccessible(true);
-            $value = $property->getValue($this);
-            if ($value instanceof IDisposable) {
+            $propertyValue = $property->getValue($this);
+            if ($propertyValue instanceof IDisposable) {
                 if ($property->isStatic()) {
-                    throw new DisposableException("Found a static property that implements GemsDisposable. This usage is not supported.");
+                    throw new StaticPropertyException();
                 }
                 if (!$property->isPublic()) {
-                    throw new DisposableException("Can not auto-dispose of non-public GemsDisposable property: {$reflector->name}::{$name}");
+                    throw new NotPublicPropertyException($reflector->name, $propertyName);
                 }
             }
-            if (is_array($value) && $this->dispose_arrays === true) {
-                array_walk_recursive($value, function ($item) {
+            if (is_array($propertyValue) && $disposeArrays) {
+                array_walk_recursive($propertyValue, function ($item) {
                     Garbage::dispose($item);
                 });
             }
-            if (is_object($value) && $property->isPublic()) {
-                Garbage::dispose($this, $name);
+            if (is_object($propertyValue) && $property->isPublic()) {
+                Garbage::dispose($this, $propertyName);
             }
         }
 
-        // remove models added by GemsModelsTrait
-        if (method_exists($this, 'disposeModels')) {
-            $this->disposeModels();
-        }
-
         unset($reflector);
+
+        if ($this instanceof IDisposeTraitListener) {
+            $this->afterDispose();
+        }
     }
 }

@@ -1,16 +1,19 @@
 <?php
 namespace cgTag\Disposable;
 
-use cgTag\Disposable\Exceptions\DisposableException;
+use cgTag\Disposable\Exceptions\MissingPropertyException;
 
 final class Garbage
 {
     /**
-     * Calls dispose if the object is GemsDisposable
+     * Calls dispose if the object is IDisposable.
      *
      * @param mixed $ref
      * @param string|null $property
-     * @throws DisposableException
+     * @throws MissingPropertyException
+     *
+     * @todo What if $ref is null?
+     * @todo What if $ref is not an object and $property is not null
      */
     public static function dispose($ref, $property = null)
     {
@@ -22,7 +25,7 @@ final class Garbage
         }
 
         if (!isset($ref->$property)) {
-            throw new DisposableException(sprintf("dispose(%s,'%s') called, but property does not exist on target object.", get_class($ref), $property));
+            throw new MissingPropertyException($ref, $property);
         }
 
         if ($ref->$property instanceof IDisposable) {
