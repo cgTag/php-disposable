@@ -4,6 +4,7 @@ namespace cgTag\Disposable\Handlers;
 use cgTag\Disposable\Exceptions\MissingPropertyException;
 use cgTag\Disposable\Exceptions\NotAnObjectException;
 use cgTag\Disposable\Exceptions\NotPublicPropertyException;
+use cgTag\Disposable\Exceptions\PropertyParamException;
 use cgTag\Disposable\Exceptions\StaticPropertyException;
 use cgTag\Disposable\IDisposable;
 
@@ -36,13 +37,27 @@ class DisposeHandler implements IDisposeHandler
     /**
      * Simply calls dispose() of the passed value implements IDisposable.
      *
-     * @param mixed $_obj
+     * @param mixed $obj
+     * @param bool $disposeArrays
+     * @return bool
      */
-    public function object($_obj)
+    public function object($obj, bool $disposeArrays = true): bool
     {
-        if ($_obj instanceof IDisposable) {
-            $_obj->dispose();
+        $result = false;
+
+        if ($obj instanceof IDisposable) {
+            if (!isset($obj->{"IDisposableCalled"})) {
+                $obj->dispose();
+                $obj->{"IDisposableCalled"} = true;
+                $result = true;
+            }
+        } elseif (is_array($obj) && $disposeArrays) {
+            array_walk_recursive($obj, function ($item) use (&$result) {
+                $result |= $this->object($item, true);
+            });
         }
+
+        return $result;
     }
 
     /**
@@ -57,33 +72,13 @@ class DisposeHandler implements IDisposeHandler
     public function properties($_this, bool $disposeArrays = true): int
     {
         $count = 0;
+
         $reflector = new \ReflectionClass($_this);
         foreach ($reflector->getProperties() as $property) {
-            $propertyName = $property->getName();
-            $property->setAccessible(true);
-            $propertyValue = $property->getValue($_this);
-            if ($propertyValue instanceof IDisposable) {
-                if ($property->isStatic()) {
-                    throw new StaticPropertyException(get_class($_this), $propertyName);
-                }
-                if (!$property->isPublic()) {
-                    throw new NotPublicPropertyException(get_class($_this), $propertyName);
-                }
-                $this->property($_this, $propertyName);
+            if ($this->property($_this, $property, $disposeArrays)) {
                 $count++;
             }
-            if (is_array($propertyValue) && $disposeArrays) {
-                array_walk_recursive($propertyValue, function ($item) use ($_this) {
-                    if ($item === $_this) {
-                        // prevents endless loop
-                        return;
-                    }
-                    $this->object($item);
-                });
-            }
         }
-
-        unset($reflector);
 
         return $count;
     }
@@ -117,19 +112,29 @@ class DisposeHandler implements IDisposeHandler
      * ```
      *
      * @param mixed $_this
-     * @param string $property
+     * @param string|\ReflectionProperty $property
+     * @param bool $disposeArrays
+     * @return bool
      * @throws NotAnObjectException
      * @throws NotPublicPropertyException
+     * @throws PropertyParamException
      * @throws StaticPropertyException
+     * @throws MissingPropertyException
      */
-    public function property($_this, string $property)
+    public function property($_this, $property, bool $disposeArrays = true): bool
     {
         if ($_this === null || !is_object($_this)) {
             throw new NotAnObjectException();
         }
 
+        if (!is_string($property) && !$property instanceof \ReflectionProperty) {
+            throw new PropertyParamException();
+        }
+
         $className = get_class($_this);
-        $reflectProp = $this->getReflectionProperty($className, $property);
+        $reflectProp = is_string($property)
+            ? $this->getReflectionProperty($className, $property)
+            : $property;
 
         if ($reflectProp->isStatic()) {
             throw new StaticPropertyException($className, $property);
@@ -139,9 +144,11 @@ class DisposeHandler implements IDisposeHandler
             throw new NotPublicPropertyException($className, $property);
         }
 
-        $this->object($reflectProp->getValue($_this));
-
-        $reflectProp->setValue($_this, null);
+        try {
+            return $this->object($reflectProp->getValue($_this), $disposeArrays);
+        } finally {
+            $reflectProp->setValue($_this, null);
+        }
     }
 
     /**

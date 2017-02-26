@@ -1,8 +1,6 @@
 <?php
 namespace cgTag\Disposable\Handlers;
 
-use cgTag\Disposable\Exceptions\MissingPropertyException;
-use cgTag\Disposable\Exceptions\NotAnObjectException;
 use cgTag\Disposable\Exceptions\NotPublicPropertyException;
 use cgTag\Disposable\Exceptions\StaticPropertyException;
 
@@ -11,9 +9,11 @@ interface IDisposeHandler
     /**
      * Simply calls dispose() of the passed value implements IDisposable.
      *
-     * @param mixed $_obj
+     * @param mixed $obj
+     * @param bool $disposeArrays
+     * @return bool
      */
-    public function object($_obj);
+    public function object($obj, bool $disposeArrays = true): bool;
 
     /**
      * Disposes the properties of an object, but not the object itself.
@@ -55,9 +55,9 @@ interface IDisposeHandler
      * ```
      *
      * @param mixed $_this
-     * @param string $property
-     * @throws MissingPropertyException
-     * @throws NotAnObjectException
+     * @param string|\ReflectionProperty $property
+     * @param bool $disposeArrays
+     * @return bool
      */
-    public function property($_this, string $property);
+    public function property($_this, $property, bool $disposeArrays = true): bool;
 }

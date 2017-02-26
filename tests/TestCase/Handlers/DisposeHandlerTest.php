@@ -3,6 +3,7 @@ namespace cgTag\Disposable\Test\TestCase\Handlers;
 
 use cgTag\Disposable\Handlers\DisposeHandler;
 use cgTag\Disposable\Handlers\IDisposeHandler;
+use cgTag\Disposable\IDisposable;
 use cgTag\Disposable\Test\Mocks\MockDisposable;
 use cgTag\Disposable\Test\Mocks\MockObjectWithProperty;
 use cgTag\Disposable\Test\Mocks\MockProperties;
@@ -24,6 +25,24 @@ class DisposeHandlerTest extends BaseTestCase
 
         $handler->object($mock);
         $this->assertSame(1, $mock->count);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldCallDisposeOnlyOnce()
+    {
+        $mock = $this->getMockBuilder(IDisposable::class)
+            ->setMethods(['dispose'])
+            ->getMock();
+
+        $mock->expects($this->once())
+            ->method('dispose');
+
+        $handler = new DisposeHandler();
+        for ($i = 0; $i < 10; $i++) {
+            $handler->object($mock);
+        }
     }
 
     /**
@@ -53,13 +72,38 @@ class DisposeHandlerTest extends BaseTestCase
             ->setMethodsExcept(['properties'])
             ->getMock();
 
-        $handler->method('property')
-            ->withConsecutive(
-                [$this->identicalTo($mock), $this->equalTo('prop1')],
-                [$this->identicalTo($mock), $this->equalTo('prop2')],
-                [$this->identicalTo($mock), $this->equalTo('prop3')],
-                [$this->identicalTo($mock), $this->equalTo('prop4')]
-            );
+        $handler->expects($this->exactly(4))
+            ->method('property')
+            ->withConsecutive([
+                $this->identicalTo($mock),
+                $this->logicalAnd(
+                    $this->isInstanceOf(\ReflectionProperty::class),
+                    $this->attribute($this->equalTo('prop1'), 'name')
+                ),
+                $this->isTrue()
+            ], [
+                $this->identicalTo($mock),
+                $this->logicalAnd(
+                    $this->isInstanceOf(\ReflectionProperty::class),
+                    $this->attribute($this->equalTo('prop2'), 'name')
+                ),
+                $this->isTrue()
+            ], [
+                $this->identicalTo($mock),
+                $this->logicalAnd(
+                    $this->isInstanceOf(\ReflectionProperty::class),
+                    $this->attribute($this->equalTo('prop3'), 'name')
+                ),
+                $this->isTrue()
+            ], [
+                $this->identicalTo($mock),
+                $this->logicalAnd(
+                    $this->isInstanceOf(\ReflectionProperty::class),
+                    $this->attribute($this->equalTo('prop4'), 'name')
+                ),
+                $this->isTrue()
+            ])
+            ->willReturn(true);
 
         $result = $handler->properties($mock);
         $this->assertSame(4, $result);
@@ -93,9 +137,24 @@ class DisposeHandlerTest extends BaseTestCase
      */
     public function shouldNotWalkArrays()
     {
-        $handler = new DisposeHandler();
+        $arr = [
+            new MockDisposable(),
+            new MockDisposable(),
+            new MockDisposable(),
+            [new MockDisposable()]
+        ];
 
-        $this->markTestSkipped();
+        /** @var DisposeHandler|PHPUnit_Framework_MockObject_MockObject $handler */
+        $handler = $this->getMockBuilder(DisposeHandler::class)
+            ->setMethodsExcept(['object'])
+            ->getMock();
+
+        $handler->object($arr, false);
+
+        $this->assertSame(0, $arr[0]->count);
+        $this->assertSame(0, $arr[1]->count);
+        $this->assertSame(0, $arr[2]->count);
+        $this->assertSame(0, $arr[3][0]->count);
     }
 
     /**
@@ -111,6 +170,17 @@ class DisposeHandlerTest extends BaseTestCase
         DisposeHandler::setInstance($mock);
         $this->assertSame($mock, DisposeHandler::$_instance);
         $this->assertSame($mock, DisposeHandler::getInstance());
+    }
+
+    /**
+     * @test
+     * @expectedException \cgTag\Disposable\Exceptions\PropertyParamException
+     * @expectedExceptionMessage Property parameter must be string or ReflectionProperty
+     */
+    public function shouldThrowForInvalidArgument()
+    {
+        $handler = new DisposeHandler();
+        $handler->property(new MockDisposable(), null);
     }
 
     /**
@@ -192,8 +262,23 @@ class DisposeHandlerTest extends BaseTestCase
      */
     public function shouldWalkArrays()
     {
-        $handler = new DisposeHandler();
+        $arr = [
+            new MockDisposable(),
+            new MockDisposable(),
+            new MockDisposable(),
+            [new MockDisposable()]
+        ];
 
-        $this->markTestSkipped();
+        /** @var DisposeHandler|PHPUnit_Framework_MockObject_MockObject $handler */
+        $handler = $this->getMockBuilder(DisposeHandler::class)
+            ->setMethodsExcept(['object'])
+            ->getMock();
+
+        $handler->object($arr, true);
+
+        $this->assertSame(1, $arr[0]->count);
+        $this->assertSame(1, $arr[1]->count);
+        $this->assertSame(1, $arr[2]->count);
+        $this->assertSame(1, $arr[3][0]->count);
     }
 }
