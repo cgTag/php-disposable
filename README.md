@@ -19,12 +19,18 @@ declaring the `dispose()` method that implements all the resource cleanup logic.
 The following example shows a simple implementation of the basic pattern.
 
 ```
-class DisposableResourceHolder implements IDisposable {
+use cgTag\Disposable\IDisposable;
+
+class ResourceHolder implements IDisposable {
     
     private $file;
     
     public function __constructor(string $filename) {
         $this->file = fopen($filename, "r");
+    }
+    
+    public function read() {
+        return stream_get_contents($this->file);
     }
     
     public function dispose() {
@@ -35,12 +41,28 @@ class DisposableResourceHolder implements IDisposable {
     }
 }
 ```
+Now you can use the global `using` function to dispose of the object when you're 
+finished with it.
+
+Here's an example of the `using` function:
+
+```
+$content = using(new ResourceHolder(), function($resource) {
+    return $resource->read();
+});
+```
+
+That might look simple but once you start following the disposable pattern memory leaks are 
+going to be a thing of the past.
+
+## dispose()
 
 Make sure to propagate calls to `dispose()` to inherited classes. You can do this by
 overriding the `dispose()` method and making sure to call `parent::dispose()`.
 
 > Note: `dispose()` will only ever be called once. It will be the last method executed on a class before `__destruct()`
-is called. You don't have to worry about properties being used as `dispose()` is called.
+is called. You don't have to worry about properties being used afterwards as `dispose()` is 
+called.
 
 ## The IDisposable Interface
 This is the primary interface used by the library. In PHP the garbage collector automatically releases
@@ -103,6 +125,9 @@ disposing of any objects that are in those arrays.
 Here is an example object that uses the `ConfigReader` from above examples:
 
 ```
+use cgTag\Disposable\IDisposable;
+use cgTag\Disposable\Traits\DisposeTrait;
+
 class Service implements IDispose {
     use DisposeTrait;
     
@@ -115,9 +140,9 @@ class Service implements IDispose {
 ```
 
 ### Privates And Memory Leaks
-The `DisposeTrait` can not dispose of private properties, but will throw an exception when a private provider
-references an object that implements the `IDisposable` interface. The trait does this because it's found a possible
-memory leak. Since the object is using the trait and private properties are not supported it means that object
+The `DisposeTrait` can not dispose of private properties, but will throw an exception when a private property
+references an object that implements the `IDisposable` interface. The trait does this because it found a possible
+memory leak. Since the object is using the trait and private properties are not supported it means that the property
 might not be disposed.
 
 To resolve this conflict make the property public or implement the `dispose()` method on the object.

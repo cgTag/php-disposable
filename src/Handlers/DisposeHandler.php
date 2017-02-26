@@ -135,13 +135,16 @@ class DisposeHandler implements IDisposeHandler
         $reflectProp = is_string($property)
             ? $this->getReflectionProperty($className, $property)
             : $property;
+        $propertyName = is_string($property)
+            ? $property
+            : $reflectProp->name;
 
         if ($reflectProp->isStatic()) {
-            throw new StaticPropertyException($className, $property);
+            throw new StaticPropertyException($className, $propertyName);
         }
 
         if (!$reflectProp->isPublic()) {
-            throw new NotPublicPropertyException($className, $property);
+            throw new NotPublicPropertyException($className, $propertyName);
         }
 
         try {

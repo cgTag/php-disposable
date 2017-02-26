@@ -1,6 +1,8 @@
 <?php
 namespace cgTag\Disposable\Test\TestCase;
 
+use cgTag\Disposable\Handlers\DisposeHandler;
+use cgTag\Disposable\Handlers\UsingHandler;
 use cgTag\Disposable\IDisposable;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
@@ -36,9 +38,13 @@ abstract class BaseTestCase extends TestCase
      */
     public function setUp()
     {
+        DisposeHandler::setInstance(null);
+        UsingHandler::setInstance(null);
+
         $this->noop = function () {
 
         };
+
         parent::setUp();
     }
 }
