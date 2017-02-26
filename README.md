@@ -2,7 +2,7 @@
 
 [![License](https://poser.pugx.org/cgtag/php-disposable/license)](https://packagist.org/packages/cgtag/php-disposable)
 [![Build Status](https://travis-ci.org/cgTag/php-disposable.svg?branch=master)](https://travis-ci.org/cgTag/php-disposable)
-[![codecov](https://codecov.io/gh/cgTag/php-exceptions/branch/master/graph/badge.svg)](https://codecov.io/gh/cgTag/php-exceptions)
+[![codecov](https://codecov.io/gh/cgTag/php-disposable/branch/master/graph/badge.svg)](https://codecov.io/gh/cgTag/php-disposable)
 [![Total Downloads](https://poser.pugx.org/cgtag/php-disposable/downloads)](https://packagist.org/packages/cgtag/php-disposable)
 [![Latest Stable Version](https://poser.pugx.org/cgtag/php-disposable/v/stable)](https://packagist.org/packages/cgtag/php-disposable)
 
