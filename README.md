@@ -1,8 +1,9 @@
-# php-disposable 
+# php-disposable
 
-[![Build Status](https://travis-ci.org/cgTag/php-disposable.svg?branch=master)](https://travis-ci.org/cgTag/php-disposable) 
+[![License](https://img.shields.io/packagist/l/cgtag/php-disposable.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/cgTag/php-disposable.svg?branch=master)](https://travis-ci.org/cgTag/php-disposable)
 [![codecov](https://codecov.io/gh/cgTag/php-exceptions/branch/master/graph/badge.svg)](https://codecov.io/gh/cgTag/php-exceptions)
-[![Latest Stable Version](https://img.shields.io/packagist/v/cgtag/phpdisposable.svg?style=flat-square&label=stable)](https://packagist.org/packages/cgtag/php-disposable)
+[![Latest Stable Version](https://img.shields.io/packagist/v/cgtag/php-disposable.svg?style=flat-square&label=stable)](https://packagist.org/packages/cgtag/php-disposable)
 
 A tiny library that adds the disposable pattern to PHP
 
@@ -46,7 +47,7 @@ class ResourceHolder implements IDisposable {
     }
 }
 ```
-Now you can use the global `using` function to dispose of the object when you're 
+Now you can use the global `using` function to dispose of the object when you're
 finished with it.
 
 Here's an example of the `using` function:
@@ -57,7 +58,7 @@ $content = using(new ResourceHolder(), function($resource) {
 });
 ```
 
-That might look simple but once you start following the disposable pattern memory leaks are 
+That might look simple but once you start following the disposable pattern memory leaks are
 going to be a thing of the past.
 
 ## dispose()
@@ -66,7 +67,7 @@ Make sure to propagate calls to `dispose()` to inherited classes. You can do thi
 overriding the `dispose()` method and making sure to call `parent::dispose()`.
 
 > Note: `dispose()` will only ever be called once. It will be the last method executed on a class before `__destruct()`
-is called. You don't have to worry about properties being used afterwards as `dispose()` is 
+is called. You don't have to worry about properties being used afterwards as `dispose()` is
 called.
 
 ## The IDisposable Interface
