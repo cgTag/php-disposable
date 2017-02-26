@@ -1,4 +1,9 @@
-# php-disposable [![Build Status](https://travis-ci.org/cgTag/php-disposable.svg?branch=master)](https://travis-ci.org/cgTag/php-disposable) [![codecov](https://codecov.io/gh/cgTag/php-exceptions/branch/master/graph/badge.svg)](https://codecov.io/gh/cgTag/php-exceptions)
+# php-disposable 
+
+[![Build Status](https://travis-ci.org/cgTag/php-disposable.svg?branch=master)](https://travis-ci.org/cgTag/php-disposable) 
+[![codecov](https://codecov.io/gh/cgTag/php-exceptions/branch/master/graph/badge.svg)](https://codecov.io/gh/cgTag/php-exceptions)
+[![Latest Stable Version](https://img.shields.io/packagist/v/cgtag/phpdisposable.svg?style=flat-square&label=stable)](https://packagist.org/packages/cgtag/php-disposable)
+
 A tiny library that adds the disposable pattern to PHP
 
 ## Requirements
